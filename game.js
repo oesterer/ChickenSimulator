@@ -54,8 +54,7 @@ view = {
 }
 
 chicken = {
-  x: 30,
-  y: 30,
+  position:new Vector(30,30),
   w: 80,
   h: 80,
   speedX: 0,
@@ -64,12 +63,11 @@ chicken = {
 
 
 dog = {
-  x: 700,
-  y: 30,
+  position:new Vector(700,30),
+  direction:new Vector(-1,1),
   w: 174,
   h: 130,
-  speedX: -5,
-  speedY: 2
+  speed: 10
 };
 
 cornCount=200;
@@ -99,7 +97,7 @@ for (i = 0; i < locations.length; i++) {
     locations[i].print();
 }
 
-
+/*
 class NonPlayableChicken {
   constructor(name, position) {
     this.name = name;
@@ -141,6 +139,8 @@ class NonPlayableChicken {
         console.log(this.name+" at "+this.position.toString());
     }
 }
+*/
+
 
 for (i = 0; i < cornCount; i++) {
     corn[i]= {
@@ -154,10 +154,10 @@ for (i = 0; i < cornCount; i++) {
 
 
 let npc=[];
-npc.push(new NonPlayableChicken("Miso",new Vector(100,100)));
-npc.push(new NonPlayableChicken("Inari",new Vector(100,100)));
-npc.push(new NonPlayableChicken("Omlet",new Vector(100,100)));
-npc.push(new NonPlayableChicken("Boba",new Vector(100,100)));
+npc.push(new NonPlayableChicken("Miso",new Vector(0,0)));
+//npc.push(new NonPlayableChicken("Inari",new Vector(100,100)));
+//npc.push(new NonPlayableChicken("Omlet",new Vector(100,100)));
+//npc.push(new NonPlayableChicken("Boba",new Vector(100,100)));
 
 for (i = 0; i < npc.length; i++) {
     npc[i].print();
@@ -177,7 +177,7 @@ let gameLoop = () => {
 	updateDog();
 
     for (i = 0; i < npc.length; i++) {
-        npc[i].updatePosition();
+        npc[i].update();
         //npc[i].print();
     }
 
@@ -218,16 +218,16 @@ let gameLoop = () => {
 
 let drawBackground = () => {
 
-    if(chicken.x<view.x+view.w/4) {
-        view.x=chicken.x-view.w/4;
-    } else if(chicken.x>view.x+view.w*3/4) {
-        view.x=chicken.x-view.w*3/4;
+    if(chicken.position.x<view.x+view.w/4) {
+        view.x=chicken.position.x-view.w/4;
+    } else if(chicken.position.x>view.x+view.w*3/4) {
+        view.x=chicken.position.x-view.w*3/4;
     }
 
-    if(chicken.y<view.y+view.h/4) {
-        view.y=chicken.y-view.h/4;
-    } else if(chicken.y>view.y+view.h*3/4) {
-        view.y=chicken.y-view.h*3/4;
+    if(chicken.position.y<view.y+view.h/4) {
+        view.y=chicken.position.y-view.h/4;
+    } else if(chicken.position.y>view.y+view.h*3/4) {
+        view.y=chicken.position.y-view.h*3/4;
     }
 
     if(view.x<0)view.x=0;
@@ -301,7 +301,7 @@ let gameInterval = setInterval(gameLoop, 1000 / fps);
 let draw = () => {
     drawBackground();
     
-    canvasContext.drawImage(chickenImg,0,0,32,32,chicken.x-view.x,chicken.y-view.y,chicken.w,chicken.h);
+    canvasContext.drawImage(chickenImg,0,0,32,32,chicken.position.x-view.x,chicken.position.y-view.y,chicken.w,chicken.h);
     for (i = 0; i < cornCount; i++) {
         canvasContext.drawImage(cornImg,0,0,214,854,corn[i].x-view.x,corn[i].y-view.y,corn[i].w,corn[i].h);
     }
@@ -314,7 +314,7 @@ let draw = () => {
     }
 
     //canvasContext.scale(-1,1)
-    canvasContext.drawImage(dogImg,0,0,348,261,dog.x-view.x,dog.y-view.y,dog.w,dog.h);
+    canvasContext.drawImage(dogImg,0,0,348,261,dog.position.x-view.x,dog.position.y-view.y,dog.w,dog.h);
     //canvasContext.scale(1,1)
 
     canvasContext.font = "48px serif";
@@ -325,20 +325,42 @@ let draw = () => {
 };
 
 let updateDog = () => {
-	dog.x=dog.x+dog.speedX;
-	dog.y=dog.y+dog.speedY;
+    dog.position=dog.position.add(dog.direction.mul(dog.speed));
 
-	if(dog.x<=0) {
+    //console.log("Dog position "+dog.position+" direction "+dog.direction);
+
+    if(dog.position.x<=0 ||
+       dog.position.x>=(world.w-dog.w) ||
+       dog.position.y<=0 ||
+       dog.position.y>=(world.h-dog.h) ||
+       Math.floor(Math.random()*1000)<5) {
+
+        v=chicken.position.sub(dog.position);
+
+//console.log("v "+v);
+//console.log("v.length "+v.length);
+        v=v.div(v.length());
+
+
+
+        dog.direction=v;
+    }
+
+
+/*
+	if(dog.position.x<=0) {
 		dog.speedX=Math.floor(Math.random() * 15) + 3;
-	} else if(dog.x>=(world.w-dog.w)) {
+	} else if(dog.position.x>=(world.w-dog.w)) {
 		dog.speedX=-1*(Math.floor(Math.random() * 15) + 3);
 	}
 
-	if(dog.y<=0) {
+	if(dog.position.y<=0) {
 		dog.speedY=Math.floor(Math.random() * 15) + 3;
-	} else if(dog.y>=(world.h-dog.h)) {
+	} else if(dog.position.y>=(world.h-dog.h)) {
 		dog.speedY=-1*(Math.floor(Math.random() * 15) + 3);
 	}
+
+*/    
 }
 
 
@@ -370,23 +392,23 @@ let updateNpc = (npc) => {
 
 
 let update = () => {	
-    chicken.x+=chicken.speedX;
-    if(chicken.x<=0) {
-        chicken.x=0;
+    chicken.position.x+=chicken.speedX;
+    if(chicken.position.x<=0) {
+        chicken.position.x=0;
         chicken.speedX=0;
     }
-    if(chicken.x>=(world.w-chicken.w)) {
-        chicken.x=(world.w-chicken.w);
+    if(chicken.position.x>=(world.w-chicken.w)) {
+        chicken.position.x=(world.w-chicken.w);
         chicken.speedX=0;
     }
 
-    chicken.y+=chicken.speedY;
-    if(chicken.y<=0) {
-        chicken.y=0;
+    chicken.position.y+=chicken.speedY;
+    if(chicken.position.y<=0) {
+        chicken.position.y=0;
         chicken.speedY=0;
     }
-    if(chicken.y>=(world.h-chicken.h)) {
-        chicken.y=(world.h-chicken.h);
+    if(chicken.position.y>=(world.h-chicken.h)) {
+        chicken.position.y=(world.h-chicken.h);
         chicken.speedY=0;
     }
 };
