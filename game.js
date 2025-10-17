@@ -155,9 +155,9 @@ for (i = 0; i < cornCount; i++) {
 
 let npc=[];
 npc.push(new NonPlayableChicken("Miso",new Vector(0,0)));
-//npc.push(new NonPlayableChicken("Inari",new Vector(100,100)));
-//npc.push(new NonPlayableChicken("Omlet",new Vector(100,100)));
-//npc.push(new NonPlayableChicken("Boba",new Vector(100,100)));
+npc.push(new NonPlayableChicken("Inari",new Vector(100,100)));
+npc.push(new NonPlayableChicken("Omlet",new Vector(100,100)));
+npc.push(new NonPlayableChicken("Boba",new Vector(100,100)));
 
 for (i = 0; i < npc.length; i++) {
     npc[i].print();
